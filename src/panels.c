@@ -8,6 +8,7 @@
  * lines), so the panels scale exactly like the game and never look sharper than it.
  */
 #include "panels.h"
+#include "app_paths.h"
 
 #include "audio.h"
 #include "natives.h"
@@ -415,10 +416,7 @@ static void save_path(char *buf, size_t n)
 {
     const char *test = SDL_getenv("ALF_SAVE");   /* tests keep their own save file */
     if (test) { SDL_strlcpy(buf, test, n); return; }
-    const char *base = SDL_GetBasePath();
-    SDL_snprintf(buf, n, "%ssaves", base ? base : "./");
-    SDL_CreateDirectory(buf);
-    SDL_snprintf(buf, n, "%ssaves/stan.sav", base ? base : "./");
+    app_save_path(buf, n, "stan.sav");
 }
 
 static void status(const char *m) { SDL_strlcpy(status_msg, m, sizeof status_msg); status_frames = 150; }

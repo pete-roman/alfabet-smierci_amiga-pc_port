@@ -22,7 +22,9 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-EXE = ROOT / "AlfabetSmierci" / "AlfabetSmierci.exe"
+from engine_path import executable
+
+EXE = executable()
 OUT = ROOT / "work" / "play"
 SAVE = OUT / "current.sav"
 NEUTRAL = (495, 300)            # outside every scene and UI rect: re-arms item clicks

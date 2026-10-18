@@ -17,7 +17,9 @@ import re
 import subprocess
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-EXE = ROOT / "AlfabetSmierci" / "AlfabetSmierci.exe"
+from engine_path import executable
+
+EXE = executable()
 OUT = ROOT / "work" / "realtime"
 RE = re.compile(r"state frame (\d+) loc (\w+) where (\S+) rwait (\d) table (\w+) miny (\d+) lmbpoll (\d+) "
                 r"music (-?\d+) (-?\d+) (-?\d+) (\d+) ms (\d+) speed (\d+) tempo ([\d.]+) title (\d)")

@@ -39,6 +39,14 @@ This list is kept up to date from day one. "Ships" means the item is part of the
 | AROS Kickstart replacement ROM (built into WinUAE) | The AROS Development Team | AROS Public License 1.1 | Booting the original in WinUAE without a Commodore ROM | no |
 | Git | Linus Torvalds, Junio C Hamano and contributors | GPL-2.0 | Version control | no |
 | Windows PowerShell | Microsoft | Windows component | Driving WinUAE over IPC and window captures (`tools/uaeipc.ps1`, `tools/winshot.ps1`, `tools/uaepark.ps1`) | no |
+| CMake | Kitware and contributors | BSD-3-Clause | Native Linux and macOS builds | no |
+| pkg-config (pkgconf) | pkgconf project contributors | ISC | Locating system SDL3 and libopenmpt for native builds | no |
+| Homebrew | Homebrew contributors | BSD-2-Clause | macOS build dependencies | no |
+| Apple Clang and macOS command-line tools | Apple | Apple developer tools licence | macOS compilation, Mach-O rewriting, ad hoc signing and zip creation | no |
+| Docker / Moby | Docker and Moby contributors | Apache-2.0 (engine and CLI) | Isolated Ubuntu 22.04 Linux package builds | no |
+| appimagetool 1.9.1 | Simon Peter and the AppImage Team | MIT (tool source; dependencies keep their licences) | Creating the Linux AppImage | no |
+| AppImage type-2 runtime 20251108 | Simon Peter and the AppImage contributors | MIT; bundled musl, libfuse, squashfuse, zstd and zlib have their own licences | Starting or extracting the single-file Linux package | yes (AppImage only; notices included) |
+| Codex and GPT-6 Luna | OpenAI | commercial | Linux/macOS build support, Linux packaging and verification | no |
 | Claude Opus 5.5 | Anthropic | commercial | AI model that did the reverse engineering, the lifter, the engine and the docs with Pete | no |
 | Claude Code | Anthropic | commercial | The agentic coding tool the port was built in | no |
 
@@ -50,6 +58,9 @@ Access to the Anthropic tools was possible thanks to the cooperation with ReadyM
 |---|---|---|---|
 | SDL3 3.4.18 | Sam Lantinga and SDL contributors | zlib | yes |
 | miniz, minimp3, stb_vorbis (built into libopenmpt; the game's music does not use them) | Rich Geldreich, RAD Game Tools, Valve Software; Lion (lieff); Sean Barrett | MIT; CC0 1.0; MIT or public domain | yes (inside libopenmpt) |
+| mpg123 1.33.7 | mpg123 project contributors | LGPL-2.1-only | yes (macOS package, libopenmpt dependency) |
+| libogg 1.3.6 | Xiph.Org Foundation | BSD-3-Clause | yes (macOS package, libopenmpt dependency) |
+| libvorbis and libvorbisfile 1.3.7 | Xiph.Org Foundation | BSD-3-Clause | yes (macOS package, libopenmpt dependency) |
 | MinGW-w64 runtime, GCC runtime libraries | mingw-w64 project; GNU Project | ZPL / public domain; GPL-3.0 with GCC Runtime Library Exception | yes (statically linked) |
 | w64devkit (build toolchain: GCC, binutils, mingw-w64) | Christopher Wellons; GCC by the GNU Project; mingw-w64 project | Unlicense (kit); GPL-3.0 with runtime exception (GCC); mingw-w64 runtime: ZPL / public domain | no (toolchain only) |
 | CMake | Kitware and contributors | BSD-3-Clause | no (toolchain only) |

@@ -5,6 +5,7 @@
  * the same memory: same buffers, same copper words, same sprite data.
  */
 #include "natives.h"
+#include "app_paths.h"
 
 #include "amiga.h"
 #include "audio.h"
@@ -487,10 +488,7 @@ static void n_load_disk(VM *vm)
 static FILE *save_disk(void)
 {
     char path[1024];
-    const char *base = SDL_GetBasePath();
-    SDL_snprintf(path, sizeof path, "%ssaves", base ? base : "./");
-    SDL_CreateDirectory(path);
-    SDL_snprintf(path, sizeof path, "%ssaves/stan_gry.adf", base ? base : "./");
+    app_save_path(path, sizeof path, "stan_gry.adf");
     FILE *f = fopen(path, "r+b");
     if (!f) {
         f = fopen(path, "w+b");

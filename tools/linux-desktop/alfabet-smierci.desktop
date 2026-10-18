@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Alfabet Śmierci
+Comment=Polish Amiga adventure from 1996
+Comment[pl]=Polska przygodówka z Amigi z 1996 roku
+Exec=AlfabetSmierci
+Icon=alfabet-smierci
+Terminal=false
+Categories=Game;AdventureGame;

@@ -14,7 +14,9 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-EXE = ROOT / "AlfabetSmierci" / "AlfabetSmierci.exe"
+from engine_path import executable
+
+EXE = executable()
 OUT = ROOT / "work" / "loctest"
 
 VERB_BUTTONS = [(545, 260), (598, 260), (545, 310), (598, 310), (545, 360)]   # look talk use open take
@@ -70,13 +72,20 @@ def run(loc, item_list, frames=4000, seed=1):
     try:
         p = subprocess.run([str(EXE)], cwd=EXE.parent, env=env, capture_output=True, text=True, timeout=240)
         log = p.stdout + p.stderr
+        exit_code = p.returncode
         timeout = False
     except subprocess.TimeoutExpired as e:
         log = (e.stdout or b"").decode(errors="replace") + (e.stderr or b"").decode(errors="replace")
         timeout = True
+        exit_code = None
     (OUT / f"{loc}.log").write_text(log, encoding="utf-8")
     problems = sorted({l for l in log.splitlines() if not l.startswith(("tick", "scripts:"))})
+    if exit_code not in (None, 0):
+        problems.append(f"process exit {exit_code}")
     locs = re.findall(r"loc \$([0-9A-F]{2})", log)
+    expected = loc.split("_")[1].upper()
+    if expected not in locs:
+        problems.append(f"target location {loc} never reported")
     return timeout, problems, sorted(set(locs))
 
 
@@ -85,9 +94,11 @@ def main():
     item_list = items()
     todo = sys.argv[1:] or locations()
     lines = []
+    failed = False
     for loc in todo:
         timeout, problems, visited = run(loc, item_list)
         status = "TIMEOUT" if timeout else ("PROBLEMS" if problems else "ok")
+        failed |= status != "ok"
         line = f"{loc:12s} {status:8s} visited {' '.join(visited)}"
         print(line, flush=True)
         lines.append(line)
@@ -95,7 +106,8 @@ def main():
             print("    " + p, flush=True)
             lines.append("    " + p)
     (OUT / "report.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

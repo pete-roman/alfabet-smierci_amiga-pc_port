@@ -7,6 +7,7 @@
  * (lines doubled), times the largest integer that fits.
  */
 #include "amiga.h"
+#include "app_paths.h"
 #include "audio.h"
 #include "natives.h"
 #include "panels.h"
@@ -350,6 +351,10 @@ int main(int argc, char **argv)
         fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
         return 1;
     }
+    if (!app_paths_init()) {
+        SDL_Quit();
+        return 1;
+    }
     char data[1024], scripts[1024];
     SDL_snprintf(data, sizeof data, "%sdata", base_dir());
     SDL_snprintf(scripts, sizeof scripts, "%sdata/scripts", base_dir());
@@ -374,11 +379,13 @@ int main(int argc, char **argv)
 
     /* window: the largest integer scale (with panels if they fit) inside 90% of the desktop;
      * the game starts fullscreen so the side panels are there from the first launch */
-    const SDL_DisplayMode *dm = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
-    int dw = dm ? dm->w : 1920, dh = dm ? dm->h : 1080, ws = 1;
+    SDL_Rect usable = {0, 0, 1920, 1080};
+    SDL_GetDisplayUsableBounds(SDL_GetPrimaryDisplay(), &usable);
+    int dw = usable.w, dh = usable.h, ws = 1;
     while (CANVAS_W * (ws + 1) <= dw * 9 / 10 && SCREEN_H * 2 * (ws + 1) <= dh * 9 / 10) ws++;
     int win_w = CANVAS_W * ws <= dw * 9 / 10 ? CANVAS_W * ws : SCREEN_W * ws;
-    win = SDL_CreateWindow("Alfabet Śmierci  (port " PORT_VERSION ")", win_w, SCREEN_H * 2 * ws, SDL_WINDOW_RESIZABLE);
+    win = SDL_CreateWindow("Alfabet Śmierci  (port " PORT_VERSION ")", win_w, SCREEN_H * 2 * ws,
+                           SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
     if (!SDL_getenv("ALF_WINDOWED")) panels_set_fullscreen(true);
     ren = SDL_CreateRenderer(win, NULL);
     SDL_SetRenderVSync(ren, 1);
@@ -409,7 +416,7 @@ int main(int argc, char **argv)
                 SDL_SetWindowSize(win, CANVAS_W * applied_scale, SCREEN_H * 2 * applied_scale);
         }
         int ww, wh;
-        SDL_GetWindowSizeInPixels(win, &ww, &wh);
+        SDL_GetRenderOutputSize(ren, &ww, &wh);
         Layout lay = layout_for(ww, wh, want_panels);
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
@@ -486,8 +493,10 @@ int main(int argc, char **argv)
         }
 
         video_render(game_rgb, sprite_layer);
-        cursor_update(lay.scale, !game_started || !g_over_game || panels_overlay_active() || natives_waiting_click() ||
-                                 amiga_frame_count() - amiga_last_lmb_poll() <= 2);
+        float density = SDL_GetWindowPixelDensity(win);
+        int cursor_scale = SDL_max(1, (int)(lay.scale / (density > 0.0f ? density : 1.0f) + 0.5f));
+        cursor_update(cursor_scale, !game_started || !g_over_game || panels_overlay_active() || natives_waiting_click() ||
+                                    amiga_frame_count() - amiga_last_lmb_poll() <= 2);
         int cw = lay.panels ? CANVAS_W : SCREEN_W;
         panels_compose(canvas, game_rgb, lay.panels);
         void *pixels; int pitch;

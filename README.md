@@ -10,7 +10,7 @@ Port by Pete Roman, for Seven Stars Multimedia and Maciej 'Maniak' Frontkiewicz,
 
 ## Polski
 
-Polska przygodówka point-and-click z 1996 roku (Arte / Seven Stars Multimedia, Amiga AGA), przeniesiona na Windows. Port uruchamia **oryginalne dyskietki gry**: zdjęcia, palety, muzyka, teksty i logika są te same co na Amidze 1200. Nowy jest tylko silnik, który je czyta.
+Polska przygodówka point-and-click z 1996 roku (Arte / Seven Stars Multimedia, Amiga AGA), przeniesiona na komputery PC. Port uruchamia **oryginalne dyskietki gry**: zdjęcia, palety, muzyka, teksty i logika są te same co na Amidze 1200. Nowy jest tylko silnik, który je czyta.
 
 ### Jak zagrać
 
@@ -57,6 +57,48 @@ Budowanie (Windows, Git Bash; wszystko lokalnie, nic systemowo):
 
 Testy: `py tools/test_locations.py`, `py tools/playthrough.py` (szczegóły w `PROGRESS.md`).
 
+#### Linux (pakiet do uruchomienia)
+
+Gotową paczkę x86-64 z SDL3 i libopenmpt zbudowanymi statycznie przygotujesz w Dockerze. Wymaga zainstalowanego Dockera, ale nie zmienia pakietów systemowych:
+
+    sh tools/build_linux_package.sh
+
+Wynikiem jest archiwum `dist/linux/AlfabetSmierci-1.0-linux-x86_64.tar.gz`; uruchom z niego `uruchom.sh`. Opcjonalny pojedynczy plik AppImage przygotujesz przez `sh tools/make_linux_appimage.sh`. Przy systemie bez FUSE: `chmod +x AlfabetSmierci-1.0-linux-x86_64.AppImage`, potem `./AlfabetSmierci-1.0-linux-x86_64.AppImage --appimage-extract-and-run`. Paczki są budowane na Ubuntu 22.04 (glibc 2.35; binarnie wymaga do GLIBC 2.34) i przeznaczone dla x86-64. SDL3 i libopenmpt są statyczne; system dostarcza biblioteki sterowników okna i dźwięku (X11/Wayland oraz ALSA/PulseAudio). Zapisy trafiają do katalogu użytkownika SDL/XDG, a dane w paczce są tylko do odczytu. Wewnątrz są licencje dołączonych bibliotek oraz sumy SHA-256. Testy: `ALF_EXE=/pełna/ścieżka/AlfabetSmierci python3 tools/test_linux_saves.py`.
+
+**Sterowanie:** lewy przycisk myszy wybiera i przechodzi, prawy przycisk lub spacja przewijają kwestie; FIRE działa spacją, środkowym przyciskiem lub padem. F11 albo Alt+Enter przełącza pełny ekran, Tab otwiera panele.
+
+#### macOS (samodzielna aplikacja)
+
+Na macOS z Homebrew przygotujesz wersjonowane archiwum `.app` z dołączonymi
+bibliotekami, podpisem ad hoc i sumą SHA-256:
+
+    brew install cmake pkgconf sdl3 libopenmpt
+    python3 tools/package_macos.py
+
+Wyniki trafiają do `dist/macos/`. Skrypt buduje aplikację, kopiuje pełny zestaw
+niestandardowych bibliotek do `Contents/Frameworks`, zmienia ich odwołania na
+ścieżki względne, podpisuje kod od środka na zewnątrz i sprawdza podpis oraz
+zależności. Paczka zbudowana i sprawdzona lokalnie ma architekturę arm64 i wymaga
+macOS 26.0, ponieważ taki minimalny system mają użyte binaria Homebrew. Nie jest to
+Universal 2. Podpis ad hoc nie jest podpisem Developer ID, a paczka nie jest
+notaryzowana przez Apple.
+
+#### Linux i macOS (build deweloperski)
+
+Natywny build deweloperski korzysta z CMake, C11, SDL3 i libopenmpt zainstalowanych w systemie. Na Ubuntu 26.04:
+
+    sudo apt install build-essential cmake pkg-config libsdl3-dev libopenmpt-dev
+    cmake -S . -B build/native -DCMAKE_BUILD_TYPE=Release
+    cmake --build build/native --parallel
+
+Na macOS z Homebrew:
+
+    brew install cmake pkgconf sdl3 libopenmpt
+    cmake -S . -B build/native -DCMAKE_BUILD_TYPE=Release
+    cmake --build build/native --parallel
+
+Na Linuxie gra znajduje się w `build/native/AlfabetSmierci/AlfabetSmierci`, a dane gry obok niej. Na macOS CMake tworzy `build/native/AlfabetSmierci.app`; dane trafiają do `Contents/Resources/data`. Te buildy wymagają systemowych bibliotek SDL3 i libopenmpt. Zapisy natywne trafiają do katalogu danych użytkownika, a obrazy dyskietek są tylko do odczytu. Testy wybierają natywny build automatycznie; `ALF_EXE=/ścieżka/do/programu` pozwala wskazać go ręcznie. GitHub Actions buduje gotowe paczki Linux i macOS.
+
 ### Prawa
 
 Gra Alfabet Śmierci: (C) 1995/1996 Arte / Seven Stars Multimedia; programowanie Maciej 'Maniak' Frontkiewicz, grafika Ryszard 'Justus' Bagiński, muzyka i scenariusz Michał 'Dixan05' Prochownik. Gra jest dziś abandonware; obrazy dyskietek są dołączone w niezmienionej postaci. Kod portu (silnik, narzędzia, dokumentacja): licencja MIT, patrz [`LICENSE`](LICENSE). Biblioteki i ich licencje: [`CREDITS.md`](CREDITS.md) i `AlfabetSmierci/THIRD_PARTY_LICENSES.txt`.
@@ -65,7 +107,7 @@ Gra Alfabet Śmierci: (C) 1995/1996 Arte / Seven Stars Multimedia; programowanie
 
 ## English
 
-A Polish point-and-click adventure from 1996 (Arte / Seven Stars Multimedia, Amiga AGA), brought to Windows. The port runs the **original game disks**: the photographs, palettes, music, texts and game logic are the same as on the Amiga 1200. Only the engine that reads them is new. The game itself is in Polish.
+A Polish point-and-click adventure from 1996 (Arte / Seven Stars Multimedia, Amiga AGA), brought to PC. The port runs the **original game disks**: the photographs, palettes, music, texts and game logic are the same as on the Amiga 1200. Only the engine that reads them is new. The game itself is in Polish.
 
 ### How to play
 
@@ -93,6 +135,27 @@ Engine in C11 with SDL3 and libopenmpt, built with a portable MinGW-w64 toolchai
     sh tools/fetch_deps.sh
     tools/toolchain/w64devkit/bin/sh tools/build_deps.sh
     tools/toolchain/w64devkit/bin/sh build.sh
+
+For a ready-to-run Linux x86-64 package, build inside Docker (no host packages are installed):
+
+    sh tools/build_linux_package.sh
+
+This creates `dist/linux/AlfabetSmierci-1.0-linux-x86_64.tar.gz`; extract it and run `uruchom.sh`. For a single-file AppImage, first build the tar package and then run `sh tools/make_linux_appimage.sh`. If FUSE is unavailable, use `chmod +x AlfabetSmierci-1.0-linux-x86_64.AppImage` and `./AlfabetSmierci-1.0-linux-x86_64.AppImage --appimage-extract-and-run`. Packages target x86-64 and are built on Ubuntu 22.04 (glibc 2.35; the game binary requires up to GLIBC 2.34). SDL3 and libopenmpt are statically linked; the host still needs SDL's X11/Wayland display and ALSA/PulseAudio backend libraries. Saves go to the SDL/XDG per-user directory; bundled game data is read-only. Third-party licenses and SHA-256 manifests are included.
+
+For a self-contained macOS application, install `cmake pkgconf sdl3 libopenmpt`
+with Homebrew and run `python3 tools/package_macos.py`. The script copies the full
+non-system library closure into the app, rewrites Mach-O paths, signs all nested code
+and the app ad hoc, verifies them, and writes a versioned zip plus SHA-256 manifest to
+`dist/macos/`. The locally verified package is arm64 and requires macOS 26.0 because
+that is the deployment target of the installed Homebrew bottles. It is not Universal
+2, Developer ID signed, or notarized.
+
+For native developer builds, use system CMake, SDL3 and libopenmpt. On Ubuntu 26.04 install `build-essential cmake pkg-config libsdl3-dev libopenmpt-dev`; on macOS install `cmake pkgconf sdl3 libopenmpt` with Homebrew. Then run:
+
+    cmake -S . -B build/native -DCMAKE_BUILD_TYPE=Release
+    cmake --build build/native --parallel
+
+Linux output is `build/native/AlfabetSmierci/AlfabetSmierci`. macOS output is `build/native/AlfabetSmierci.app`, with game data in its Resources directory. These developer builds require SDL3 and libopenmpt shared libraries from the system. Native saves use the per-user application data directory. Automation scripts discover this native build or accept an explicit path through `ALF_EXE`. GitHub Actions publishes the self-contained Linux and macOS packages.
 
 ### Rights
 
